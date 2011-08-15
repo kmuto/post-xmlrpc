@@ -90,15 +90,15 @@ button.signal_connect("clicked") {
       FileUtils.mv(filename, "#{@config["pictdir"]}/#{newfilename}") if filename != "#{@config["pictdir"]}/#{newfilename}"
       fork {
         # TODO: ネイティブで変換したほうがいい
-        exec("convert", "-geometry", "#{@config["thumbsize"]}", "#{pictdir}/#{newfilename}", "#{@config["thumbdir"]}/#{newfilename}")
+        exec("convert", "-geometry", "#{@config["thumbsize"]}", "#{@config["pictdir"]}/#{newfilename}", "#{@config["thumbdir"]}/#{newfilename}")
       }
       Process.waitall
 
       # フル画像とサムネールのアップロード
-      IO.popen(putcmd.gsub("%OFILE", "#{@config["pictdir"]}/#{newfilename}").gsub("%DFILE", newfilename)) do |p|
+      IO.popen(@config["putcmd"].gsub("%OFILE", "#{@config["pictdir"]}/#{newfilename}").gsub("%DFILE", newfilename)) do |p|
         puts p.readlines.join("\n")
       end
-      IO.popen(putthumbcmd.gsub("%OFILE", "#{@config["thumbdir"]}/#{newfilename}").gsub("%DFILE", "#{newfilename}")) do |p|
+      IO.popen(@config["putthumbcmd"].gsub("%OFILE", "#{@config["thumbdir"]}/#{newfilename}").gsub("%DFILE", "#{newfilename}")) do |p|
         puts p.readlines.join("\n")
       end
       
