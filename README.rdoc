@@ -1,0 +1,47 @@
+= post-xmlrpc
+
+post-xmlrpc は、kmuto 個人用途の tDiary 向け GUI 投稿アプリケーションです。
+
+digikam や gthumb、あるいは Nautilus などで料理の写真を閲覧しているときに、
+タイトルとコメントを付けてアップロードする、という利用を想定しています。
+
+== 前提
+* Ruby 1.8
+* libgtk2-ruby1.8
+* ImageMagick
+* SSH (リモートサーバにアップロードする場合)
+* xmlrpc を動作するように設定済みの tDiary (サーバ側)
+
+== セットアップ
+dot.post-xmlrpc.rb を ~/.post-xmlrpc.rb としてコピーし、内容を編集します。
+指定の各フォルダ (pictdir、thumbdir、testcmd、putcmd、putthumbcmd にあるフォルダ) は事前に作成しておいてください。
+
+post-xmlrpc.rb は何らかの写真整理ツールとセットで使うことを想定しています。
+たとえばgthumb であれば、gthumb メニューの Tools のコマンドに登録しておけば、
+簡単に起動できるようになります。
+
+tDiary 標準の xmlrpc.rb ではアップロード当日の記事しか作成できないので、
+newPost 時に現在無視されている publish パラメータを流用した
+modified/xmlrpc.rb でサーバの xmlrpc.rb を置き換えます。
+
+また、post-xmlrpc.rb の cook_post が投稿の本体ですが、kmuto 個人用途
+になっています。適宜置き換えるようにしてください。この中で使われている
+image_cook プラグインは、image プラグインを改変したもので、modified/image.rb
+に改変後のファイルがあります。
+
+== 操作
+
+「post-xmlrpc.rb ファイル名」を実行すると、次のような動作になります。
+
+1. ファイルの日付を使って「2011-08-15.jpg」といった名前が作られます。
+2. アップロード先のフォルダを探して、すでに同じ名前のファイルがある場合には、「2011-08-15-2.jpg」、「2011-08-15-3.jpg」、…のような名前でアップロードするよう準備されます。
+3. 画像のプレビューのウィンドウが開き、タイトルとコンテンツの記入欄に記入できます。スタイルは Wiki スタイルを前提としています (cook_post メソッドの内容を書き換えればほかのスタイルにもできるでしょう)。
+4. 「書き込み」をクリックすると、ファイルの実際のリネーム (およびピクチャフォルダへのムーブ)、サムネールの生成、画像および記事のアップロードが行われます。
+
+== ライセンス
+
+GNU General Public License Version 2.
+
+== Copyright
+
+Copyright (c) 2011 Kenshi Muto
