@@ -8,9 +8,15 @@ digikam や gthumb、あるいは Nautilus などで料理の写真を閲覧し�
 == 前提
 * Ruby 1.8
 * libgtk2-ruby1.8
+* xmlrpc を動作するように設定済みの tDiary (サーバ側)
+
+=== サーバまたはローカルアップロードの場合
 * ImageMagick
 * SSH (リモートサーバにアップロードする場合)
-* xmlrpc を動作するように設定済みの tDiary (サーバ側)
+
+=== Picasa アップロードの場合
+ * rmagick
+ * picasa_on_rails (http://picasaonrails.googlecode.com/svn/trunk/picasa_on_rails)
 
 == セットアップ
 dot.post-xmlrpc.rb を ~/.post-xmlrpc.rb としてコピーし、内容を編集します。
@@ -29,14 +35,29 @@ modified/xmlrpc.rb でサーバの xmlrpc.rb を置き換えます。
 image_cook プラグインは、image プラグインを改変したもので、modified/image.rb
 に改変後のファイルがあります。
 
+Picasa にアップロードするときには、.post-xmlrpc.rb の picasa を true にし、
+picasa_username、picasa_passwd、picasa_album を変更してください。
+漏洩の不安がある場合、picasa_passwd を nil にして、環境変数 PICASA_PASSWD
+で指定してもかまいません。
+また、tDiary 側では、picasa プラグインを有効にしてください。
+
 == 操作
 
 「post-xmlrpc.rb ファイル名」を実行すると、次のような動作になります。
+
+=== Picasa アップロードでない場合
 
 1. ファイルの日付を使って「2011-08-15.jpg」といった名前が作られます。
 2. アップロード先のフォルダを探して、すでに同じ名前のファイルがある場合には、「2011-08-15-2.jpg」、「2011-08-15-3.jpg」、…のような名前でアップロードするよう準備されます。
 3. 画像のプレビューのウィンドウが開き、タイトルとコンテンツの記入欄に記入できます。スタイルは Wiki スタイルを前提としています (cook_post メソッドの内容を書き換えればほかのスタイルにもできるでしょう)。
 4. 「書き込み」をクリックすると、ファイルの実際のリネーム (およびピクチャフォルダへのムーブ)、サムネールの生成、画像および記事のアップロードが行われます。
+
+=== Picasa アップロードの場合
+
+1. ファイルの日付を使って「2011-08-15.jpg」といった名前が作られます。
+2. 必要に応じてリサイズの上、Picasa にアップロードが行われます。
+3. 画像のプレビューのウィンドウが開き、タイトルとコンテンツの記入欄に記入できます。スタイルは Wiki スタイルを前提としています (cook_post メソッドの内容を書き換えればほかのスタイルにもできるでしょう)。Picasa の画像リンクはすでに挿入されています。
+4. 「書き込み」をクリックすると、ファイルの実際のリネーム (およびピクチャフォルダへのムーブ)、サムネールの生成、記事のアップロードが行われます。
 
 == ライセンス
 
@@ -45,3 +66,10 @@ GNU General Public License Version 2.
 == Copyright
 
 Copyright (c) 2011 Kenshi Muto
+
+なお、picasa_on_rails 内のファイルは、下記のとおりです。
+
+GNU General Public License Version 3
+
+Code71, Inc (http://www.code71.com), creator of ScrumPad (http://www.scrumpad.com), a RoR Agile/Scrum project management and collaboration tool.
+
