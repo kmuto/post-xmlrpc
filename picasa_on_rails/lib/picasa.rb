@@ -24,6 +24,7 @@ module Picasa
       request.use_ssl = true
       request.verify_mode = OpenSSL::SSL::VERIFY_NONE
       response, data = request.post(uri.path, "accountType=HOSTED_OR_GOOGLE&Email=#{email}&Passwd=#{password}&service=lh2&source=#{source}")
+puts "D==#{data.to_s}"
   
       authMatch = Regexp.compile("(Auth=)([A-Za-z0-9_\-]+)\n").match(data.to_s)
       if authMatch

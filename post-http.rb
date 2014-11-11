@@ -1,15 +1,15 @@
-#!/usr/bin/ruby1.8
+#!/usr/bin/ruby
 # encoding: utf-8
 #
 # 写真ファイルを日付にリネームし、タイトルと内容を入力してtDiaryの記事として投稿する(HTTP)
 #
-# Copyright 2013 Kenshi Muto <kmuto@debian.org>
+# Copyright 2013-2014 Kenshi Muto <kmuto@debian.org>
 #
-# Ruby: gtk2が必要。Debian WheezyではRuby 1.8用しかない?
+# Ruby: gtk2が必要。
 # サーバ: tDiary。
 # コマンド: リモートアップロードの場合はsshが必要。
 #          サムネールの作成にimagemagickが必要。
-#          Picasaモードのときにはrmagick、picasa on railsが必要。
+#          Picasaモードのときにはrmagick、picasa.gemが必要。
 #
 require 'rubygems'
 require 'cgi'
@@ -78,28 +78,23 @@ def counttest_remote(filename, testcmd)
 end
 
 def counttest_picasa(filename, albumname, picasa)
-  albums = picasa.albums(:access => "public")
-  albums.each do |album|
-    if album.name == albumname
-      photos = album.photos
-      if photos.size > 0
-        files = []
-        photos.each do |photo|
-          files.push(photo.title)
-        end
-
-        count = 1
-        while true
-          return filename unless files.include?(filename)
-          count += 1
-          filename.sub!(".", "-#{count}.") if count == 2
-          filename.sub!(/-\d+\./, "-#{count}.")
-        end
-      else
-        return filename
-      end
-      break
+  album = get_album(picasa, albumname)
+  photos = picasa.album.show(album.id).entries
+  if photos.size > 0
+    files = []
+    photos.each do |photo|
+      files.push(photo.title)
     end
+
+    count = 1
+    while true
+      return filename unless files.include?(filename)
+      count += 1
+      filename.sub!(".", "-#{count}.") if count == 2
+      filename.sub!(/-\d+\./, "-#{count}.")
+    end
+  else
+    return filename
   end
   return nil
 end
@@ -111,13 +106,20 @@ def errorexit(msg)
     exit
 end
 
-def upload_picasa(imgfile, filename, picasa)
+def get_album(picasa, albumname)
+  albums = picasa.album.list.entries
+  albums.find { |album| album.title == albumname }
+end
+
+def upload_picasa(imgfile, filename, picasa, albumname)
   img_data = open(imgfile, "rb").read
-  photo = picasa.post_photo(img_data, :album => @config["picasa_album"],
-                            :summary => "Upload from ruby api",
-                            :title => filename,
-                            :local_file_name => filename)
-  return photo.url
+  photo = picasa.photo.create(
+    get_album(picasa, albumname).id,
+    :binary => img_data,
+    :content_type => "image/jpeg",
+    :title => filename,
+    :summary => "Upload from ruby api")
+  photo.content.src
 end
 
 def main
@@ -133,11 +135,12 @@ def main
     @config["picasa_passwd"] = ENV["PICASA_PASSWD"] if @config["picasa_passwd"].nil?
     errorexit("パスワードが指定されていません。") if @config["picasa_passwd"].nil?
     
-    picasa = Picasa::Picasa.new
-    picasa.login(@config["picasa_username"], @config["picasa_passwd"])
-    errorexit("Picasa にログインできません。") if picasa.picasa_session.auth_key.nil?
+    picasa = Picasa::Client.new(
+      :user_id => @config["picasa_username"],
+      :password => @config["picasa_passwd"])
+    errorexit("Picasa にログインできません。") if picasa.nil?
   end
-  
+
   filename = ARGV.shift
   
   errorexit("ファイルが指定されていないか、該当ファイルが存在しません。") if filename.nil? || !File.exist?(filename)
@@ -208,10 +211,10 @@ def main
             Dir.mktmpdir do |dir|
               img2.write("#{dir}/resized.jpg")
               uploadtarget = "#{dir}/resized.jpg"
-              newfilename = upload_picasa(uploadtarget, newfilename, picasa)
+              newfilename = upload_picasa(uploadtarget, newfilename, picasa, @config["picasa_album"])
             end
           else
-            newfilename = upload_picasa(uploadtarget, newfilename, picasa)
+            newfilename = upload_picasa(uploadtarget, newfilename, picasa, @config["picasa_album"])
           end
           errorexit("ファイル名を取得できません。何か問題が起きています。") if newfilename.nil?
           # サムネールパートを挿入

@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby
+#!/usr/bin/ruby
 # encoding: utf-8
 #
 # 写真ファイルを日付にリネームし、タイトルと内容を入力してtDiaryの記事として投稿する
@@ -11,6 +11,7 @@
 #          サムネールの作成にimagemagickが必要。
 #          Picasaモードのときにはrmagick、picasa on railsが必要。
 #
+require 'rubygems'
 require 'xmlrpc/client'
 require 'fileutils'
 require 'gtk2'
@@ -203,6 +204,7 @@ def main
         puts
         puts titletext.text.strip
         puts contenttext.buffer.text.strip
+        puts newfilename
         Gtk.main_quit
       end
     end

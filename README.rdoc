@@ -6,8 +6,8 @@ digikam や gthumb、あるいは Nautilus などで料理の写真を閲覧し�
 タイトルとコメントを付けてアップロードする、という利用を想定しています。
 
 == 前提
-* Ruby 1.8
-* libgtk2-ruby1.8
+* Ruby
+* libgtk2-ruby
 * xmlrpc を動作するように設定済みの tDiary (サーバ側)
 
 === サーバまたはローカルアップロードの場合
@@ -16,7 +16,10 @@ digikam や gthumb、あるいは Nautilus などで料理の写真を閲覧し�
 
 === Picasa アップロードの場合
  * rmagick
- * picasa_on_rails (http://picasaonrails.googlecode.com/svn/trunk/picasa_on_rails)
+ * picasa.gem
+
+(picasa_on_railsは新しいRubyバージョンで動作しないため、picasa.gemを
+利用することになりました。)
 
 == セットアップ
 dot.post-xmlrpc.rb を ~/.post-xmlrpc.rb としてコピーし、内容を編集します。
@@ -65,11 +68,4 @@ GNU General Public License Version 2.
 
 == Copyright
 
-Copyright (c) 2011 Kenshi Muto
-
-なお、picasa_on_rails 内のファイルは、下記のとおりです。
-
-GNU General Public License Version 3
-
-Code71, Inc (http://www.code71.com), creator of ScrumPad (http://www.scrumpad.com), a RoR Agile/Scrum project management and collaboration tool.
-
+Copyright (c) 2011-2014 Kenshi Muto
