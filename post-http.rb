@@ -11,6 +11,13 @@
 #          サムネールの作成にimagemagickが必要。
 #          Picasaモードのときにはrmagick、picasa.gemが必要。
 #
+# Picasaのアクセストークンを事前に取得する必要がある
+# https://github.com/morgoth/picasa#authentication
+# 1. https://developers.google.com/oauthplaygroundにアクセス
+# 2. Picasa Web v2サービスを選択し、Authorize APIsをクリック
+# 3. Exchange authorization code for tokensをクリック
+# 4. 表示されるJSONのaccess_token文字列がトークン
+
 require 'rubygems'
 require 'cgi'
 require 'uri'
@@ -137,7 +144,7 @@ def main
     
     picasa = Picasa::Client.new(
       :user_id => @config["picasa_username"],
-      :password => @config["picasa_passwd"])
+      :access_token => @config["picasa_passwd"])
     errorexit("Picasa にログインできません。") if picasa.nil?
   end
 
