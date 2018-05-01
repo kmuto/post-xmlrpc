@@ -1,15 +1,18 @@
 #!/usr/bin/ruby
+# -*- coding: utf-8 -*-
 # Copyright 2018 Kenshi Muto
 # メールからinstagramのURL、記事内容を取り出して、投稿する
 require 'mail'
 require 'uri'
 require 'cgi'
+require 'open-uri'
 require 'net/http'
+require 'nkf'
 require_relative '.post-instadiary.rb'
 
 content = ''
 ARGF.each do |l|
-  content << l
+  content << NKF.nkf('-w -B0', l)
 end
 
 mail = Mail.new(content)
@@ -23,12 +26,21 @@ com = []
 insta = nil
 mail.body.to_s.split("\n").each do |l|
   l.chomp!
+  next if l.empty?
   if l =~ /\A\-\-/
     break
   end
 
   if l =~ /\Ahttps:/
     insta = l.match(/\/p\/(.+?)\/\Z/)[1]
+
+    # download
+    wc = open(l).read.force_encoding('utf-8')
+    # Instagram: “タラノメとベーコンのパスタ、アスパラのグリル”
+    # if wc =~ /利用しています：「(.+?)」/
+    if wc =~ /Instagram: “(.+?)”/
+      subject << $1
+    end
     next
   end
 
