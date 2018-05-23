@@ -32,7 +32,7 @@ mail.body.to_s.split("\n").each do |l|
   end
 
   if l =~ /\Ahttps:/
-    insta = l.match(/\/p\/(.+?)\/\Z/)[1]
+    insta = l.match(/\/p\/(.+?)\//)[1]
 
     # download
     wc = open(l).read.force_encoding('utf-8')
