@@ -26,12 +26,17 @@ com = []
 insta = nil
 mail.body.to_s.split("\n").each do |l|
   l.chomp!
-  next if l.empty?
-  if l =~ /\A\-\-/
+  next if l.empty? || l =~ /\A\-\-Apple/ || l =~ /Content/ || l =~ /charset/
+  if l =~ /\A\-\-/ || l =~ /=E2=80=94/
     break
   end
 
   if l =~ /\Ahttps:/
+    if l =~ /\/\/ig\.me/
+      ret = `curl -s -I #{l}`
+      l = ret.match(/\nlocation: (.+)[\r\n]/)[1]
+    end
+
     insta = l.match(/\/p\/(.+?)\//)[1]
 
     # download
