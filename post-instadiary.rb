@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 # -*- coding: utf-8 -*-
-# Copyright 2018 Kenshi Muto
+# Copyright 2018-2019 Kenshi Muto
 # メールからinstagramのURL、記事内容を取り出して、投稿する
 require 'mail'
 require 'uri'
@@ -17,21 +17,23 @@ end
 
 mail = Mail.new(content)
 if !@config['allow_from'].include?(mail.from[0]) ||
-   @config['allow_to'] != mail.to[0]
+   !@config['allow_to'].include?(mail.to[0])
   exit 1
 end
 
 subject = []
 com = []
 insta = nil
+
 mail.body.to_s.split("\n").each do |l|
-  l.chomp!
+  l = l.chomp.gsub(/<.+?>/, '') # HTMLメール
   next if l.empty? || l =~ /\A\-\-Apple/ || l =~ /Content/ || l =~ /charset/
   if l =~ /\A\-\-/ || l =~ /=E2=80=94/
     break
   end
 
   if l =~ /\Ahttps:/
+    l = CGI.unescapeHTML(l)
     if l =~ /\/\/ig\.me/
       ret = `curl -s -I #{l}`
       l = ret.match(/\nlocation: (.+)[\r\n]/)[1]
@@ -49,18 +51,18 @@ mail.body.to_s.split("\n").each do |l|
     next
   end
 
-  if insta
-    com << l
-  else
-    subject << l
-  end
+  #コメントはミスりやすいので無視することにした
+  #if insta
+  #  com << l
+  #else
+  #  subject << l
+  #end
 end
 
 cont = <<EOT
 ! [cooking] #{subject.join}
 {{instagram '#{insta}'}}
 
-#{com.join("\n\n")}
 EOT
 
 t = Time.now
